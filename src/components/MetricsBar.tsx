@@ -81,8 +81,20 @@ export default function MetricsBar() {
                 // 2. The Inline Source (if showSources is true)
                 if (showSources && res.meta) {
                     const sourceSup = document.createElement('sup');
-                    // Style: Bright Red Badge style for maximum visibility
-                    sourceSup.className = 'ml-1 px-1 rounded bg-red-600 text-white text-[10px] font-bold cursor-pointer hover:bg-red-700 shadow-sm print:hidden transition-all transform hover:scale-110 active:scale-95';
+
+                    // Style: Bright Red Badge style. 
+                    // Use inline styles to guarantee visibility regardless of Tailwind purging.
+                    sourceSup.style.backgroundColor = '#cc0000'; // Strong Red
+                    sourceSup.style.color = '#ffffff'; // White text
+                    sourceSup.style.padding = '0 4px';
+                    sourceSup.style.borderRadius = '3px';
+                    sourceSup.style.marginLeft = '4px';
+                    sourceSup.style.fontSize = '10px';
+                    sourceSup.style.fontWeight = 'bold';
+                    sourceSup.style.cursor = 'pointer';
+                    sourceSup.style.display = 'inline-block';
+                    sourceSup.style.verticalAlign = 'top';
+                    sourceSup.className = 'hover:opacity-80 shadow-sm print:hidden transition-all transform hover:scale-110 active:scale-95';
                     sourceSup.textContent = `[src]`;
 
                     // Detailed Tooltip explanation
@@ -94,7 +106,7 @@ export default function MetricsBar() {
                     sourceSup.title = `SOURCE TYPE: ${method}\n\nTitle: ${res.meta.title}\nDescription: ${res.meta.description}\n${details}\n\nURL: ${res.meta.url}`;
 
                     // On click, open URL
-                    sourceSup.onclick = (e) => {
+                    sourceSup.onclick = (e: any) => {
                         e.stopPropagation();
                         e.preventDefault();
                         if (res.meta?.url && res.meta.url.startsWith('http')) {
