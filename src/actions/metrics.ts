@@ -51,6 +51,12 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
         sourceUsed: 'fallback',
         fetchedAt: metric.source.fallback.as_of,
         status: 'stale',
+        meta: {
+            title: metric.title,
+            description: metric.description,
+            url: 'Manual Verification / Estimate',
+            methodUsed: 'fallback'
+        }
     };
 }
 

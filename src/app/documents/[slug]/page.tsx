@@ -37,11 +37,11 @@ async function fetchDocHtml(docId: string): Promise<string> {
 
       <section style="margin-bottom: 2rem;">
         <h3>4. Webpages Offline vs Online</h3>
-        <p>Out of <strong>{{metric:eot_webpages_total}} Million</strong> webpages archived, more than 50% are offline. (Suspect)</p>
+        <p>Out of <strong>{{metric:eot_webpages_total}}</strong> webpages archived, more than 50% are offline.</p>
         <ul style="list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem;">
-          <li><strong>{{metric:eot_webpages_archived}}</strong> webpages archived in EOT 2024</li>
-          <li><strong>{{metric:eot_webpages_offline_count}}</strong> ({{metric:eot_webpages_offline_pct}}%) are offline (Suspect)</li>
-          <li><strong>{{metric:eot_webpages_online_count}}</strong> ({{metric:eot_webpages_online_pct}}%) are online. (Suspect)</li>
+          <li><strong>{{metric:eot_webpages_archived}}</strong> total webpages in EOT 2024 index</li>
+          <li><strong>{{metric:eot_webpages_offline_count}}</strong> ({{metric:eot_webpages_offline_pct}}%) are offline</li>
+          <li><strong>{{metric:eot_webpages_online_count}}</strong> ({{metric:eot_webpages_online_pct}}%) are online</li>
         </ul>
         <div style="margin-top: 1rem; font-size: 0.95rem; background: #f9fafb; padding: 0.75rem; border-radius: 4px;">
             <p style="margin:0;"><strong>Examples:</strong></p>
@@ -52,7 +52,7 @@ async function fetchDocHtml(docId: string): Promise<string> {
 
       <section style="margin-bottom: 2rem;">
         <h3>5. YouTube Channels & Videos</h3>
-        <p>Government websites linked to more than 1,000 government run YouTube channels. Collectively these accounts have uploaded more than <strong>{{metric:eot_youtube_videos_total}} Million</strong> videos. Out of {{metric:eot_youtube_videos_total}} Million videos ~1% (17k) videos have been taken offline.</p>
+        <p>Government websites linked to more than 1,000 government run YouTube channels. Collectively these accounts have uploaded more than <strong>{{metric:eot_youtube_videos_total}}</strong> videos. Out of these videos, ~1% (17k) have been taken offline.</p>
         <ul style="list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem;">
           <li><strong>{{metric:eot_youtube_videos_archived}}</strong> videos archived</li>
           <li><strong>{{metric:eot_youtube_videos_offline_count}}</strong> ({{metric:eot_youtube_videos_offline_pct}}%) are offline</li>
