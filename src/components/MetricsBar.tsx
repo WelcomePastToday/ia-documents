@@ -63,26 +63,6 @@ export default function MetricsBar() {
 
     function applyMetricsToDom(results: MetricResult[]) {
         // Look for markers {{metric:ID}}
-        // Since we don't control the React tree of the doc (it's dangerouslySetInnerHTML),
-        // we must use vanilla DOM manipulation.
-        // However, simply replacing innerHTML is destructive if markers are intricate.
-        // Better strategy: Find all text nodes, regex match, replace.
-        // OR: The doc renderer wraps markers in <span data-metric-id="...">?
-        // If we assume the source doc has {{metric:id}}, we can treat them as text.
-
-        // Approach:
-        // 1. Get the content container
-        const container = document.getElementById('doc-content');
-        if (!container) return;
-
-        // 2. Iterate text nodes - this is expensive but safe.
-        // Optimization: The DocRenderer could pre-scan and wrap markers in <span>.
-        // Let's assume raw text replacement for now.
-
-        // Actually, `DocRenderer` logic runs on server. It could wrap {{metric:foo}} with <span id="metric-foo">...</span>
-        // That makes client-side updates O(1) via getElementById.
-        // I'll update DocRenderer to do that.
-
         results.forEach(res => {
             const els = document.querySelectorAll(`[data-metric-id="${res.metricId}"]`);
             els.forEach(el => {
@@ -101,9 +81,17 @@ export default function MetricsBar() {
                 // 2. The Inline Source (if showSources is true)
                 if (showSources && res.meta) {
                     const sourceSup = document.createElement('sup');
-                    sourceSup.className = 'ml-1 text-[10px] text-blue-600 cursor-pointer hover:underline print:hidden';
-                    sourceSup.textContent = `[Source]`;
-                    sourceSup.title = `${res.meta.title}\n${res.meta.description}\nURL: ${res.meta.url}`;
+                    // Style: Pink/Fuchsia Badge style
+                    sourceSup.className = 'ml-1 px-1 rounded bg-fuchsia-100 text-fuchsia-700 text-[10px] font-medium cursor-pointer hover:bg-fuchsia-200 border border-fuchsia-200 print:hidden transition-colors';
+                    sourceSup.textContent = `[src]`;
+
+                    // Detailed Tooltip explanation
+                    const method = res.sourceUsed === 'primary' ? 'Live API' : (res.sourceUsed === 'archived' ? 'Archived Record' : 'Legacy Fallback / Manual');
+                    const details = res.sourceUsed === 'fallback'
+                        ? `Note: This value is a manual standard/estimate as live data was unavailable.`
+                        : `This data was fetched live using ${res.meta.methodUsed || 'API'}.`;
+
+                    sourceSup.title = `SOURCE TYPE: ${method}\n\nTitle: ${res.meta.title}\nDescription: ${res.meta.description}\n${details}\n\nURL: ${res.meta.url}`;
 
                     // On click, open URL
                     sourceSup.onclick = (e) => {
@@ -112,7 +100,7 @@ export default function MetricsBar() {
                         if (res.meta?.url && res.meta.url.startsWith('http')) {
                             window.open(res.meta.url, '_blank');
                         } else {
-                            alert(`Source: ${res.meta?.description}`);
+                            alert(`Source: ${res.meta?.description}\n\n(This is a manual fallback value. No live URL available.)`);
                         }
                     };
                     el.appendChild(sourceSup);
