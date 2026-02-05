@@ -24,7 +24,11 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
     try {
         const primaryResult = await fetchSource(metric.source.primary);
         if (primaryResult !== null && primaryResult !== undefined) {
-            return formatResult(metric, primaryResult, 'primary');
+            const result = formatResult(metric, primaryResult, 'primary');
+            if (validateValue(result.value, metric)) {
+                return result;
+            }
+            console.warn(`Primary source validation failed for ${metric.id} (Value: ${String(result.value).substring(0, 50)}...)`);
         }
     } catch (e: any) {
         console.warn(`Primary source failed for ${metric.id}: ${e.message}`);
@@ -35,7 +39,11 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
         try {
             const archivedResult = await fetchSource(metric.source.archived);
             if (archivedResult !== null && archivedResult !== undefined) {
-                return formatResult(metric, archivedResult, 'archived');
+                const result = formatResult(metric, archivedResult, 'archived');
+                if (validateValue(result.value, metric)) {
+                    return result;
+                }
+                console.warn(`Archived source validation failed for ${metric.id}`);
             }
         } catch (e: any) {
             console.warn(`Archived source failed for ${metric.id}: ${e.message}`);
@@ -62,6 +70,33 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
             methodUsed: 'fallback'
         }
     };
+}
+
+/**
+ * Validates that the metric value is sane and not leaked HTML or empty junk.
+ */
+function validateValue(value: any, definition: MetricDefinition): boolean {
+    const strVal = String(value).toLowerCase();
+
+    // 1. Leakage detection (HTML Tags)
+    if (strVal.includes('<!doctype') || strVal.includes('<html') || strVal.includes('<body') || strVal.includes('<div')) {
+        return false;
+    }
+
+    // 2. Type specific validation
+    if (definition.type === 'numeric') {
+        // Should contain at least one digit
+        const hasDigit = /[0-9]/.test(strVal);
+        if (!hasDigit) return false;
+
+        // Numeric values shouldn't be hundreds of characters long (usually indicates a failed parse dump)
+        if (strVal.length > 100) return false;
+    }
+
+    // 3. Length sanity check
+    if (strVal.length === 0) return false;
+
+    return true;
 }
 
 async function fetchSource(source: MetricSource): Promise<any> {
@@ -226,3 +261,4 @@ function formatResult(metric: MetricDefinition, rawValue: any, source: 'primary'
         }
     };
 }
+
