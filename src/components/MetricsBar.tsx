@@ -152,7 +152,7 @@ export default function MetricsBar() {
         const sections = document.querySelectorAll('#doc-content section');
         sections.forEach(sec => {
             sec.querySelector('.section-citations')?.remove();
-            const sectionMetricIds = Array.from(sec.querySelectorAll('.metric-wrapper')).map(el => (el as HTMLElement).dataset.metricId);
+            const sectionMetricIds = Array.from(sec.querySelectorAll('[data-metric-id]')).map(el => (el as HTMLElement).dataset.metricId);
             const uniqueMetricIds = [...new Set(sectionMetricIds)];
             if (uniqueMetricIds.length === 0) return;
 
