@@ -58,6 +58,8 @@ export default function MetricsBar() {
     useEffect(() => {
         if (metricsList.length === 0) return;
 
+        console.log(`Applying Evidence Rail: ${showSources ? 'ON' : 'OFF'}`);
+
         const counts: Record<string, number> = {};
         const railRoot = document.getElementById('evidence-rail');
         const wrapper = document.querySelector('.doc-wrapper');
@@ -105,8 +107,13 @@ export default function MetricsBar() {
 
                     const rect = htmlEl.getBoundingClientRect();
                     const docTop = document.querySelector('.doc-container')?.getBoundingClientRect().top || 0;
+                    // We need to account for current scroll if docTop is viewport-relative
+                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                    const relativeTop = rect.top + scrollY - (document.querySelector('.doc-container')?.getBoundingClientRect().top || 0) - scrollY;
+                    // Wait, rect.top is relative to viewport. docTop is relative to viewport.
+                    // difference is relative to doc top.
                     marker.style.position = 'absolute';
-                    marker.style.top = `${rect.top - docTop}px`;
+                    marker.style.top = `${rect.top - (document.querySelector('.doc-container')?.getBoundingClientRect().top || 0)}px`;
                     marker.onclick = (e) => handleInteraction(e as any, m.metricId);
                     railRoot.appendChild(marker);
                 }
@@ -213,15 +220,22 @@ export default function MetricsBar() {
 
     return (
         <>
-            {/* Global Control */}
-            <div className="fixed top-6 right-8 z-[60] no-print">
-                <button
-                    onClick={() => setShowSources(!showSources)}
-                    className={`group flex items-center gap-2 px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border ${showSources ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}
-                >
-                    <svg className={`w-3 h-3 ${showSources ? 'text-blue-400' : 'text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    <span>{showSources ? 'Hide Evidence rail' : 'Show Evidence rail'}</span>
-                </button>
+            {/* Global Control - Scientific Toggle */}
+            <div className="fixed top-6 right-8 z-[100] no-print">
+                <div className="proof-toggle-wrap">
+                    <span className="proof-toggle-label">Evidence Rail</span>
+                    <label className="proof-switch">
+                        <input
+                            type="checkbox"
+                            checked={showSources}
+                            onChange={(e) => {
+                                console.log('Toggle Clicked:', e.target.checked);
+                                setShowSources(e.target.checked);
+                            }}
+                        />
+                        <span className="proof-slider"></span>
+                    </label>
+                </div>
             </div>
 
             {/* Sync Footer */}
@@ -261,7 +275,7 @@ export default function MetricsBar() {
                         <div className={`badge badge-${activeMetric.sourceUsed}`}>
                             {activeMetric.sourceUsed === 'primary' ? 'Verified Source' : (activeMetric.sourceUsed === 'archived' ? 'Archive Match' : 'Manual Fallback')}
                         </div>
-                        <button onClick={() => setActiveId(null)}>✕</button>
+                        <button onClick={() => setActiveId(null)} className="p-1 hover:bg-slate-100 rounded">✕</button>
                     </div>
 
                     <div className="popover-content">

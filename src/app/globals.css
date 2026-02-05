@@ -49,7 +49,6 @@ body {
   width: 40px;
   flex-shrink: 0;
   position: absolute;
-  /* Changed to absolute to allow markers to be positioned relative to document top */
   left: -50px;
   top: 0;
   bottom: 0;
@@ -69,7 +68,6 @@ body {
 
 .rail-marker {
   height: 1.7em;
-  /* Matches line height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,6 +85,79 @@ body {
   color: var(--color-accent);
 }
 
+/* Proof Mode Toggle - Premium Design */
+.proof-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.proof-toggle-wrap:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.proof-toggle-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
+
+.proof-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.proof-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.proof-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e2e8f0;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.proof-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:checked+.proof-slider {
+  background-color: #0f172a;
+}
+
+input:checked+.proof-slider:before {
+  transform: translateX(20px);
+}
+
 /* Metric Underlines & Chips */
 .metric-value {
   position: relative;
@@ -95,7 +166,6 @@ body {
   display: inline-block;
 }
 
-/* Subtly interactive link - dotted underline only under the number */
 .metrics-enabled .metric-value {
   border-bottom: 1.5px dotted rgba(0, 0, 0, 0.15);
 }
@@ -105,7 +175,6 @@ body {
   background: rgba(37, 99, 235, 0.03);
 }
 
-/* Subtle superscript chip - always present but low contrast */
 .citation-chip {
   font-size: 9px;
   font-weight: 600;
@@ -229,11 +298,12 @@ body {
 
 /* Status Badges */
 .badge {
-  padding: 2px 6px;
-  border-radius: 9999px;
+  padding: 3px 8px;
+  border-radius: 4px;
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .badge-primary {
@@ -251,7 +321,7 @@ body {
   color: #991b1b;
 }
 
-/* Section Citations (Journal/Scientific Style) */
+/* Section Citations */
 .section-citations {
   margin-top: 2rem;
   padding: 1.5rem;
@@ -263,7 +333,6 @@ body {
   color: #64748b;
   display: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
 .metrics-active .section-citations {
@@ -303,22 +372,21 @@ body {
 /* Sync Footer */
 .sync-footer {
   position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: rgba(15, 23, 42, 0.9);
   backdrop-filter: blur(8px);
   color: white;
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
+  padding: 0.75rem 2rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  justify-content: center;
+  gap: 2rem;
   z-index: 50;
   font-size: 11px;
   font-family: var(--font-sans);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sync-status {
@@ -390,9 +458,9 @@ body {
 /* Print Section */
 .print-footnotes {
   display: none;
-  margin-top: 3rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
+  margin-top: 5rem;
+  border-top: 3px solid #000;
+  padding-top: 1.5rem;
 }
 
 @media print {
@@ -409,7 +477,8 @@ body {
   }
 
   .sync-footer,
-  .evidence-rail {
+  .evidence-rail,
+  .proof-toggle-wrap {
     display: none !important;
   }
 
