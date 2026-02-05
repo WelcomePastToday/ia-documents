@@ -1,0 +1,21 @@
+id: eot_youtube_videos_online_count
+title: "Online YouTube Videos"
+description: "Count of YouTube videos marked as live."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024Videos/States%20Rights%20on%20Education"
+    method: GET
+    format: html
+    selector: ".facets-header:contains('Live Web Status') + ul li a[href*='alive:true'] .count | text"
+  fallback:
+    value: "2,026,763"
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9,]+)"
+display:
+  section: "YouTube"
+  order: 3

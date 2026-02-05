@@ -1,0 +1,19 @@
+id: eot_webpages_offline_pct
+title: "Offline Webpages %"
+description: "Metric for Offline Webpages %"
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://example.com/api/placeholder/eot_webpages_offline_pct" 
+    method: GET
+    format: json
+    selector: "value"
+  fallback:
+    value: 53.2274 
+    as_of: "2025-02-05"
+display:
+  section: "EOT 2024"
+  order: 1

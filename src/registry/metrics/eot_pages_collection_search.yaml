@@ -1,0 +1,23 @@
+id: eot_pages_collection_search
+title: "EOT 2024 Collection Count"
+description: "Total number of items in the EOT 2024 collection."
+type: numeric
+unit:
+  source: count
+  output: items
+source:
+  primary:
+    url: "https://archive.org/advancedsearch.php?q=collection%3Aeot2024&fl%5B%5D=identifier&rows=0&output=json"
+    method: GET
+    format: json
+    selector: "response.numFound"
+  archived: 
+    url: "https://web.archive.org/web/20241201000000/https://archive.org/advancedsearch.php?q=collection%3Aeot2024&fl%5B%5D=identifier&rows=0&output=json"
+    format: json
+    selector: "response.numFound"
+  fallback:
+    value: 5000
+    as_of: "2024-12-01"
+display:
+  section: "Overview"
+  order: 1

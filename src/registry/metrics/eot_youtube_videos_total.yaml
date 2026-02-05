@@ -1,0 +1,23 @@
+id: eot_youtube_videos_total
+title: "Total YouTube Videos"
+description: "Total YouTube videos in the collection."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024Videos/States%20Rights%20on%20Education"
+    method: GET
+    format: html
+    selector: ".about-box h1:contains('videos') | text" 
+    # "Search 2,044,054 videos using..."
+    # We will need to extract the number regex from this text string.
+  fallback:
+    value: "2,044,054"
+    as_of: "2025-02-05"
+normalization:
+   regex: "Search ([0-9,]+) videos"
+display:
+  section: "YouTube"
+  order: 1

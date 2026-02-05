@@ -1,0 +1,19 @@
+id: eot_youtube_videos_offline_pct
+title: "Offline YouTube Videos %"
+description: "Metric for Offline YouTube Videos %"
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://example.com/api/placeholder/eot_youtube_videos_offline_pct" 
+    method: GET
+    format: json
+    selector: "value"
+  fallback:
+    value: 0.84 
+    as_of: "2025-02-05"
+display:
+  section: "EOT 2024"
+  order: 1

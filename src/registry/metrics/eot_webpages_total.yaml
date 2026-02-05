@@ -1,0 +1,26 @@
+id: eot_webpages_total
+title: "Total Webpages"
+description: "Total webpages archived in EOT 2024."
+type: numeric
+unit:
+  source: count
+  output: million
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024Videos/States%20Rights%20on%20Education"
+    method: GET
+    format: html
+    selector: ".facets-header:contains('Live Web Status') + ul li a[href*='alive:true'] .count | text"
+    # Improved selector: Look for the link with `alive:true` facet URL (Internet Archive usually has these).
+    # OR: Just try to get the text "Live (X)" via text match?
+    # Cheerio :contains is good.
+    # Let's try slightly looser selector.
+    # .facets-header that contains text "Live Web Status" -> next UL -> find LI that contains text "Live" -> find .count
+  fallback:
+    value: "398,724,386"
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9,]+)"
+display:
+  section: "Webpages"
+  order: 1

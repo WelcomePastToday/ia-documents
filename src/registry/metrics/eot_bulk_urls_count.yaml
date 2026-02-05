@@ -1,0 +1,14 @@
+id: eot_bulk_urls_count
+title: "Bulk URLs Count"
+description: "Estimated count of URLs in bulk seed lists."
+type: numeric
+unit:
+  source: count
+  output: million
+source:
+  fallback:
+    value: 2.5
+    as_of: "2025-02-05"
+display:
+  section: "Nominations"
+  order: 4

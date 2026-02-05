@@ -1,0 +1,22 @@
+id: eot_articles_highly_likely
+title: "Highly Likely Citations"
+description: "Articles classified as 'EOT' (Highly Likely)."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://docs.google.com/spreadsheets/d/1uYtLyNrefJRSXAtqwNq9wultzx9ePqyVzQznsQj2tdw/gviz/tq?tqx=out:csv&gid=115580262"
+    method: GET
+    format: text
+  fallback:
+    value: 501
+    as_of: "2025-02-05"
+normalization:
+  language: "javascript"
+  function: "return (data.match(/\"EOT\"/g) || []).length;" 
+  # Matches string literal "EOT" in the CSV
+display:
+  section: "Impact"
+  order: 2

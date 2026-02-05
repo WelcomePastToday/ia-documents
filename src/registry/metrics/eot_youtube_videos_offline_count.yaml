@@ -1,0 +1,21 @@
+id: eot_youtube_videos_offline_count
+title: "Offline YouTube Videos"
+description: "Count of YouTube videos marked as unavailable/offline."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024Videos/States%20Rights%20on%20Education"
+    method: GET
+    format: html
+    selector: ".facets-header:contains('Live Web Status') + ul li a[href*='alive:false'] .count | text"
+  fallback:
+    value: "17,169"
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9,]+)"
+display:
+  section: "YouTube"
+  order: 2

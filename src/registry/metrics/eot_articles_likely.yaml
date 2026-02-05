@@ -1,0 +1,21 @@
+id: eot_articles_likely
+title: "Likely Citations"
+description: "Articles classified as 'Possible EOT Links' (Likely)."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://docs.google.com/spreadsheets/d/1uYtLyNrefJRSXAtqwNq9wultzx9ePqyVzQznsQj2tdw/gviz/tq?tqx=out:csv&gid=115580262"
+    method: GET
+    format: text
+  fallback:
+    value: 415
+    as_of: "2025-02-05"
+normalization:
+  language: "javascript"
+  function: "return (data.match(/Possible EOT Links/g) || []).length;"
+display:
+  section: "Impact"
+  order: 3

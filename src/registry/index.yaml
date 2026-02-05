@@ -1,0 +1,25 @@
+version: "1.0.0"
+metrics:
+  - eot_data_size_pb
+  - eot_webpages_total
+  - eot_webpages_archived
+  - eot_webpages_offline_count
+  - eot_webpages_offline_pct
+  - eot_webpages_online_count
+  - eot_webpages_online_pct
+  - eot_youtube_videos_total
+  - eot_youtube_videos_archived
+  - eot_youtube_videos_offline_count
+  - eot_youtube_videos_offline_pct
+  - eot_youtube_videos_online_count
+  - eot_youtube_videos_online_pct
+  - eot_nomination_seeds
+  - eot_nominators_count
+  - eot_bulk_lists_count
+  - eot_bulk_urls_count
+  - eot_articles_count
+  - eot_articles_highly_likely
+  - eot_articles_likely
+  - eot_gov_domains_total
+  - eot_gov_hosts_total
+  - eot_pages_collection_search

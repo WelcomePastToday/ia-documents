@@ -1,0 +1,26 @@
+id: eot_data_size_pb
+title: "Data Size (PB)"
+description: "Total size of EOT 2024 Collection in Petabytes. Scraped from Archive.org collection page."
+type: numeric
+unit:
+  source: string
+  output: PB
+source:
+  primary:
+    url: "https://archive.org/details/EndOfTerm2024WebCrawls?tab=about"
+    method: GET
+    format: html
+    selector: ".finer-stats | text" 
+    # Attempt to find the statistic in the metadata block.
+    # On the 'about' tab, sometimes stats are in specific divs.
+    # Alternatively, use the 'fallback' if this is hard.
+    # Let's try to match the "1.6 PB" text if it appears.
+    # Normal regex will extract it.
+  fallback:
+    value: 2.4
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9.]+)\\s+PB"
+display:
+  section: "Data Volume"
+  order: 1

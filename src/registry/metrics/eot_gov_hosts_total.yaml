@@ -1,0 +1,19 @@
+id: eot_gov_hosts_total
+title: "Gov Hosts"
+description: "Metric for Gov Hosts"
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://example.com/api/placeholder/eot_gov_hosts_total" 
+    method: GET
+    format: json
+    selector: "value"
+  fallback:
+    value: 44795 
+    as_of: "2025-02-05"
+display:
+  section: "EOT 2024"
+  order: 1

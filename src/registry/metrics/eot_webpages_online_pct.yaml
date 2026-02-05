@@ -1,0 +1,19 @@
+id: eot_webpages_online_pct
+title: "Online Webpages %"
+description: "Metric for Online Webpages %"
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://example.com/api/placeholder/eot_webpages_online_pct" 
+    method: GET
+    format: json
+    selector: "value"
+  fallback:
+    value: 46.7719 
+    as_of: "2025-02-05"
+display:
+  section: "EOT 2024"
+  order: 1

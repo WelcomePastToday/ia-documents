@@ -1,0 +1,22 @@
+id: eot_nomination_seeds
+title: "Nomination Seeds"
+description: "Count of individual seed nominations."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://digital2.library.unt.edu/nomination/eth2024/"
+    method: GET
+    format: html
+    selector: "body | text" 
+    # Broad selector, use regex to find the number
+  fallback:
+    value: "14,067"
+    as_of: "2025-02-05"
+normalization:
+  regex: "Number of URLs Nominated:\\s*([0-9]+)"
+display:
+  section: "Nominations"
+  order: 1

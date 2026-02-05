@@ -1,0 +1,17 @@
+id: eot_gov_domains_total
+title: "Gov Domains Total"
+description: "Total US Federal Government domains (federal only .gov/.mil + misc)."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  fallback:
+    value: 4257
+    as_of: "2025-02-05"
+normalization:
+  language: "javascript"
+  function: "csv_row_count"
+display:
+  section: "Government Domains"
+  order: 1

@@ -1,0 +1,19 @@
+id: eot_bulk_lists_count
+title: "Bulk Seed Lists"
+description: "Number of bulk seed lists in the GitHub repository."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://api.github.com/repos/end-of-term/eot2024/contents/seed-lists"
+    method: GET
+    format: json
+    selector: "length"
+  fallback:
+    value: 130
+    as_of: "2025-02-05"
+display:
+  section: "Nominations"
+  order: 3

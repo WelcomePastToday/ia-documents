@@ -1,0 +1,22 @@
+id: eot_webpages_archived
+title: "Total Webpages Archived"
+description: "Total webpages in the EOT 2024 collection."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024WebCrawls/"
+    method: GET
+    format: html
+    selector: ".about-box h1 | text" 
+    # "Search 398,724,386 webpages..."
+  fallback:
+    value: "398,724,386"
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9,]+)"
+display:
+  section: "Webpages"
+  order: 1

@@ -1,0 +1,111 @@
+/* Global CSS */
+
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: 'Merriweather', 'Georgia', serif;
+  --color-paper: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-ui-bg: #f3f4f6;
+  --color-accent: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #1a1a1a;
+    /* Dark mode paper? Maybe keep paper white for "doc" feel, but dark wrapper */
+    /* Actually, user wants "print/PDF friendly". Usually implies white paper. */
+    /* Let's keep the document area white, but the surrounding app dark if preferred. */
+    /* For now, a clean light mode is often more "official document". */
+  }
+}
+
+body {
+  background-color: var(--color-ui-bg);
+  color: #333;
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Document Container */
+.doc-container {
+  max-width: 8.5in;
+  /* Standard Letter width */
+  margin: 2rem auto 8rem;
+  /* Bottom margin for control bar */
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 1in;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-height: 11in;
+  font-family: var(--font-serif);
+  line-height: 1.6;
+}
+
+/* Typography for Doc */
+.doc-container h1,
+.doc-container h2,
+.doc-container h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #111;
+}
+
+.doc-container p {
+  margin-bottom: 1.25em;
+  font-size: 1.05rem;
+}
+
+/* Print Overrides */
+@media print {
+  body {
+    background: white;
+  }
+
+  .doc-container {
+    box-shadow: none;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+    /* Hide control bar */
+  }
+}
+
+/* Metrics Bar */
+.metrics-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+  background: #000;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #333;
+  transform: translateY(-1px);
+}

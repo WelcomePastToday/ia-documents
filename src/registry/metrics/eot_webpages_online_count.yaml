@@ -1,0 +1,21 @@
+id: eot_webpages_online_count
+title: "Online Webpages Count"
+description: "Count of webpages marked as live."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://web.archive.org/collection-search/EndOfTerm2024WebCrawls/"
+    method: GET
+    format: html
+    selector: ".facets-header:contains('Live Web Status') + ul li a[href*='alive:true'] .count | text"
+  fallback:
+    value: "186,491,167"
+    as_of: "2025-02-05"
+normalization:
+  regex: "([0-9,]+)"
+display:
+  section: "Webpages"
+  order: 3

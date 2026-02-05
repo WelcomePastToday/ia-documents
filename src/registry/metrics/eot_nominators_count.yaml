@@ -1,0 +1,21 @@
+id: eot_nominators_count
+title: "Nominators Count"
+description: "Count of unique individuals who nominated for EOT 2024."
+type: numeric
+unit:
+  source: count
+  output: count
+source:
+  primary:
+    url: "https://digital2.library.unt.edu/nomination/eth2024/"
+    method: GET
+    format: html
+    selector: "body | text"
+  fallback:
+    value: "471"
+    as_of: "2025-02-05"
+normalization:
+  regex: "Number of Nominators:\\s*([0-9]+)"
+display:
+  section: "Nominations"
+  order: 2
