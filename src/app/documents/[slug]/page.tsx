@@ -138,13 +138,24 @@ export default async function DocumentPage({ params }: PageProps) {
   const contentHtml = processDocHtml(rawHtml);
 
   return (
-    <main className="min-h-screen pb-20">
-      <div className="doc-container">
-        <div
-          id="doc-content"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
-        />
+    <main className="min-h-screen pb-20 bg-gray-50">
+      <div className="doc-wrapper">
+        <article className="doc-container shadow-2xl">
+          <div
+            id="doc-content"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
+
+          {/* Footnotes will be injected here by MetricsBar */}
+          <div id="footnotes-root"></div>
+        </article>
+
+        {/* Marginalia Column (Desktop) */}
+        <aside id="margin-notes" className="margin-column no-print">
+          {/* Citation cards will be injected here */}
+        </aside>
       </div>
+
       <MetricsBar />
     </main>
   );
