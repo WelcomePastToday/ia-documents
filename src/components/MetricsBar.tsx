@@ -115,6 +115,7 @@ export default function MetricsBar() {
 
         setMetricCounts(counts);
         renderFootnotes();
+        renderSectionCitations();
     }, [metricsList, showSources, isMobile]);
 
     const handleInteraction = (e: React.MouseEvent | MouseEvent, id: string) => {
@@ -146,6 +147,39 @@ export default function MetricsBar() {
             setLoading(false);
         }
     };
+
+    function renderSectionCitations() {
+        const sections = document.querySelectorAll('#doc-content section');
+        sections.forEach(sec => {
+            sec.querySelector('.section-citations')?.remove();
+            const sectionMetricIds = Array.from(sec.querySelectorAll('.metric-wrapper')).map(el => (el as HTMLElement).dataset.metricId);
+            const uniqueMetricIds = [...new Set(sectionMetricIds)];
+            if (uniqueMetricIds.length === 0) return;
+
+            const citBlock = document.createElement('div');
+            citBlock.className = 'section-citations no-print';
+            citBlock.innerHTML = `<h5>Section Citations</h5><div class="citation-list"></div>`;
+            const list = citBlock.querySelector('.citation-list')!;
+
+            uniqueMetricIds.forEach(id => {
+                const metric = metricsList.find(m => m.metricId === id);
+                if (!metric) return;
+                const idx = metricsList.findIndex(m => m.metricId === id) + 1;
+                const item = document.createElement('div');
+                item.className = 'citation-item';
+                item.innerHTML = `
+                    <div class="citation-item-number">${idx}.</div>
+                    <div class="citation-item-content">
+                        <strong>${metric.meta?.title}</strong>: ${metric.value}. 
+                        Observed via <span class="italic">${metric.meta?.methodUsed}</span> 
+                        from <a href="${metric.meta?.url.replace('Manual ', '')}" target="_blank" class="text-blue-600 hover:underline">${new URL(metric.meta?.url.replace('Manual ', '') || 'https://example.com').hostname}</a>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            sec.appendChild(citBlock);
+        });
+    }
 
     function renderFootnotes() {
         const footRoot = document.getElementById('footnotes-root');
