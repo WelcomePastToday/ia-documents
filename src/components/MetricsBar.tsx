@@ -263,74 +263,115 @@ export default function MetricsBar() {
                 </div>
             </div>
 
-            {/* Popover */}
+            {/* Data-Forward Evidence Popover */}
             {activeMetric && typeof document !== 'undefined' && createPortal(
                 <div
                     className="evidence-popover"
                     style={{
                         top: popoverPos.top,
-                        left: isMobile ? 0 : Math.min(popoverPos.left, window.innerWidth - 360)
+                        left: isMobile ? 0 : Math.min(popoverPos.left, window.innerWidth - 340)
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="popover-header">
-                        <div className={`badge badge-${activeMetric.sourceUsed}`}>
-                            {activeMetric.sourceUsed === 'primary' ? 'Verified Source' : (activeMetric.sourceUsed === 'archived' ? 'Archive Match' : 'Manual Fallback')}
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <span className={`badge badge-${activeMetric.sourceUsed}`}>
+                                {activeMetric.sourceUsed === 'primary' ? 'Verified' : (activeMetric.sourceUsed === 'archived' ? 'Archived' : 'Manual')}
+                            </span>
+                            <span className="popover-title" title={activeMetric.meta?.title}>{activeMetric.meta?.title}</span>
                         </div>
-                        <button onClick={() => setActiveId(null)} className="p-1 hover:bg-slate-100 rounded">✕</button>
+                        <button onClick={() => setActiveId(null)} className="text-slate-400 hover:text-slate-600">✕</button>
                     </div>
 
-                    <div className="popover-content">
-                        <div className="mb-4">
-                            <h4 className="text-[13px] font-black text-slate-900 leading-tight mb-1">{activeMetric.meta?.title}</h4>
-                            <p className="text-[10px] text-slate-400 italic">Referenced in {metricCounts[activeMetric.metricId] || 1} places.</p>
+                    <div className="popover-body">
+                        {/* 1. Data Grid */}
+                        <div className="data-grid">
+                            <div>
+                                <div className="data-label">Observation</div>
+                                <div className="data-value font-bold text-base">{activeMetric.value}</div>
+                            </div>
+                            <div>
+                                <div className="data-label">Status</div>
+                                <div className="data-value flex items-center gap-1.5">
+                                    <div className={`w-2 h-2 rounded-full ${activeMetric.status === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                    <span>{activeMetric.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="data-label">Captured</div>
+                                <div className="data-value">{new Date(activeMetric.fetchedAt).toLocaleDateString()}</div>
+                            </div>
+                            <div>
+                                <div className="data-label">Method</div>
+                                <div className="data-value mono">{activeMetric.meta?.methodUsed || 'API Sync'}</div>
+                            </div>
                         </div>
 
-                        <div className="meta-grid">
-                            <span className="meta-label">Observation</span>
-                            <span className="text-sm font-black text-blue-600">{activeMetric.value}</span>
-                            <span className="meta-label">Captured</span>
-                            <span className="meta-value">{new Date(activeMetric.fetchedAt).toLocaleDateString()}</span>
-                            <span className="meta-label">Method</span>
-                            <span className="meta-value font-bold">{activeMetric.meta?.methodUsed || 'API Sync'}</span>
-                            <span className="meta-label">Link</span>
-                            <div className="meta-value">
+                        {/* 2. Evidence Link */}
+                        <div className="evidence-section">
+                            <div className="data-label mb-1">Evidence Source</div>
+                            <div className="link-row">
                                 <a
-                                    href={activeMetric.meta?.url.replace('Manual ', '')}
+                                    href={activeMetric.meta?.url.replace('Manual ', '') || '#'}
                                     target="_blank"
-                                    className="text-blue-600 underline font-black flex items-center gap-1 group truncate"
+                                    rel="noopener noreferrer"
+                                    className="evidence-link group"
                                 >
-                                    <span>{new URL(activeMetric.meta?.url.replace('Manual ', '') || 'https://example.com').hostname}</span>
-                                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    <span className="truncate">
+                                        {(() => {
+                                            try {
+                                                const url = activeMetric.meta?.url.replace('Manual ', '');
+                                                return url && url.startsWith('http') ? new URL(url).hostname : 'Reference Source';
+                                            } catch { return 'Reference Source'; }
+                                        })()}
+                                    </span>
+                                </a>
+                                <a href={activeMetric.meta?.url.replace('Manual ', '') || '#'} target="_blank" className="link-action hover:text-blue-600">
+                                    OPEN <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </a>
                             </div>
                         </div>
 
-                        <div className="evidence-chain border-slate-200 border mt-4">
-                            <div className="flex justify-between items-center mb-2 px-1">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Provenance Timeline</span>
-                                <span className="text-[8px] font-bold text-emerald-600">HIGH CONFIDENCE (99%)</span>
-                            </div>
-                            <div className="space-y-1.5">
-                                <div className="chain-step">
-                                    <div className={`step-indicator ${activeMetric.sourceUsed === 'primary' ? 'step-ok' : 'step-fail'}`} />
-                                    <span className="text-[10px]">Primary API Stream</span>
+                        {/* 3. Provenance Chain */}
+                        <div className="provenance-section">
+                            <div className="data-label mb-2">Verification Chain</div>
+                            <div className="chain-list">
+                                <div className="chain-item">
+                                    <div className={`chain-indicator ${activeMetric.sourceUsed === 'primary' ? 'active' : 'failed'}`} />
+                                    <div className="chain-content">
+                                        <div className="chain-title">Primary API Stream</div>
+                                        <div className="chain-meta">Live check against source API</div>
+                                    </div>
                                 </div>
-                                <div className="chain-step">
-                                    <div className={`step-indicator ${activeMetric.sourceUsed === 'archived' ? 'step-ok' : (activeMetric.sourceUsed === 'primary' ? 'step-ok' : 'step-warn')}`} />
-                                    <span className="text-[10px]">Wayback Recovery Mirror</span>
+                                <div className="chain-item">
+                                    <div className={`chain-indicator ${activeMetric.sourceUsed === 'archived' ? 'active' : (activeMetric.sourceUsed === 'primary' ? 'active' : 'warn')}`} />
+                                    <div className="chain-content">
+                                        <div className="chain-title">Wayback Recovery Mirror</div>
+                                        <div className="chain-meta">Internet Archive snapshot lookup</div>
+                                    </div>
                                 </div>
                                 {activeMetric.sourceUsed === 'fallback' && (
-                                    <div className="mt-2 p-2 bg-rose-50 text-[10px] text-rose-800 font-bold rounded border border-rose-100 italic">
-                                        ⚠ Using fallback: {activeMetric.meta?.failoverReason || 'live source failed validation.'}
+                                    <div className="chain-item">
+                                        <div className="chain-indicator failed" />
+                                        <div className="chain-content">
+                                            <div className="chain-title text-rose-700">Fallback Activated</div>
+                                            <div className="fail-note">
+                                                Reason: {activeMetric.meta?.failoverReason || 'Validation failed or connection timeout.'}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="mt-4 flex gap-6 pt-3 border-t border-slate-100">
-                            <button onClick={() => navigator.clipboard.writeText(activeMetric.meta?.url.replace('Manual ', '') || '')} className="text-[10px] font-black uppercase text-slate-400 hover:text-blue-600">Copy Link</button>
-                            <button onClick={() => navigator.clipboard.writeText(`${activeMetric.meta?.title}: ${activeMetric.value}. Evidence: ${activeMetric.meta?.url.replace('Manual ', '')}`)} className="text-[10px] font-black uppercase text-slate-400 hover:text-blue-600">Full Cite</button>
+                        {/* 4. Actions Footer */}
+                        <div className="popover-footer">
+                            <span className="ref-count">Ref in {metricCounts[activeMetric.metricId] || 1} places</span>
+                            <div className="action-cluster">
+                                <button className="mini-btn" onClick={() => navigator.clipboard.writeText(activeMetric.value?.toString() || '')}>Copy Value</button>
+                                <button className="mini-btn" onClick={() => navigator.clipboard.writeText(activeMetric.meta?.url.replace('Manual ', '') || '')}>Copy Link</button>
+                            </div>
                         </div>
                     </div>
                 </div>,
