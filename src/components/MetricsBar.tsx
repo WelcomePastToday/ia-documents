@@ -165,6 +165,19 @@ export default function MetricsBar() {
                 const metric = metricsList.find(m => m.metricId === id);
                 if (!metric) return;
                 const idx = metricsList.findIndex(m => m.metricId === id) + 1;
+
+                let displaySource = 'Source';
+                const cleanUrl = metric.meta?.url.replace('Manual ', '') || '';
+                try {
+                    if (cleanUrl.startsWith('http')) {
+                        displaySource = new URL(cleanUrl).hostname;
+                    } else {
+                        displaySource = cleanUrl || 'Reference';
+                    }
+                } catch (e) {
+                    displaySource = cleanUrl || 'Reference';
+                }
+
                 const item = document.createElement('div');
                 item.className = 'citation-item';
                 item.innerHTML = `
@@ -172,7 +185,7 @@ export default function MetricsBar() {
                     <div class="citation-item-content">
                         <strong>${metric.meta?.title}</strong>: ${metric.value}. 
                         Observed via <span class="italic">${metric.meta?.methodUsed}</span> 
-                        from <a href="${metric.meta?.url.replace('Manual ', '')}" target="_blank" class="text-blue-600 hover:underline">${new URL(metric.meta?.url.replace('Manual ', '') || 'https://example.com').hostname}</a>
+                        from <a href="${cleanUrl}" target="_blank" class="text-blue-600 hover:underline">${displaySource}</a>
                     </div>
                 `;
                 list.appendChild(item);
