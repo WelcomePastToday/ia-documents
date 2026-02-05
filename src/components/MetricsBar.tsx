@@ -81,8 +81,8 @@ export default function MetricsBar() {
                 // 2. The Inline Source (if showSources is true)
                 if (showSources && res.meta) {
                     const sourceSup = document.createElement('sup');
-                    // Style: Pink/Fuchsia Badge style
-                    sourceSup.className = 'ml-1 px-1 rounded bg-fuchsia-100 text-fuchsia-700 text-[10px] font-medium cursor-pointer hover:bg-fuchsia-200 border border-fuchsia-200 print:hidden transition-colors';
+                    // Style: Bright Red Badge style for maximum visibility
+                    sourceSup.className = 'ml-1 px-1 rounded bg-red-600 text-white text-[10px] font-bold cursor-pointer hover:bg-red-700 shadow-sm print:hidden transition-all transform hover:scale-110 active:scale-95';
                     sourceSup.textContent = `[src]`;
 
                     // Detailed Tooltip explanation
