@@ -1,22 +1,13 @@
-/* Global CSS */
+/* Global CSS - Evidence Optimized */
 
 :root {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: 'Merriweather', 'Georgia', serif;
   --color-paper: #ffffff;
   --color-ink: #1a1a1a;
-  --color-ui-bg: #f3f4f6;
+  --color-ui-bg: #f9fafb;
   --color-accent: #2563eb;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: #1a1a1a;
-    /* Dark mode paper? Maybe keep paper white for "doc" feel, but dark wrapper */
-    /* Actually, user wants "print/PDF friendly". Usually implies white paper. */
-    /* Let's keep the document area white, but the surrounding app dark if preferred. */
-    /* For now, a clean light mode is often more "official document". */
-  }
+  --color-muted: #94a3b8;
 }
 
 body {
@@ -28,13 +19,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Document Container - Updated for Margin Notes */
+/* Document Framework */
 .doc-wrapper {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 2rem;
-  max-width: 1200px;
+  gap: 1rem;
+  max-width: 1300px;
   margin: 0 auto;
   position: relative;
 }
@@ -42,213 +33,285 @@ body {
 .doc-container {
   max-width: 8.5in;
   width: 100%;
-  margin: 2rem 0 8rem;
+  margin: 2rem 0 10rem;
   background: var(--color-paper);
   color: var(--color-ink);
-  padding: 1in;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.8in 1in;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.02);
   min-height: 11in;
   font-family: var(--font-serif);
-  line-height: 1.6;
+  line-height: 1.7;
   position: relative;
-  transition: all 0.3s ease;
 }
 
-/* Margin Column */
-.margin-column {
-  width: 280px;
+/* Evidence Rail (Slim Margin Markers) */
+.evidence-rail {
+  width: 40px;
   flex-shrink: 0;
-  margin-top: 2rem;
-  position: sticky;
-  top: 2rem;
+  position: absolute;
+  /* Changed to absolute to allow markers to be positioned relative to document top */
+  left: -50px;
+  top: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
 }
 
-@media (max-width: 1200px) {
-  .margin-column {
-    display: none;
-  }
-
-  .doc-wrapper {
-    display: block;
-  }
-
-  .doc-container {
-    margin-left: auto;
-    margin-right: auto;
-  }
+.metrics-active .evidence-rail {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
-/* Citation Chips */
-.citation-chip {
-  display: inline-flex;
+.rail-marker {
+  height: 1.7em;
+  /* Matches line height */
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  line-height: 1;
-  font-weight: 700;
-  color: var(--color-accent);
-  background: rgba(37, 99, 235, 0.1);
-  border-radius: 4px;
-  padding: 1px 4px;
-  margin-left: 2px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--color-muted);
+  opacity: 0.4;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rail-marker:hover {
+  opacity: 1;
+  color: var(--color-accent);
+}
+
+/* Metric Underlines & Chips */
+.metric-value {
+  position: relative;
+  transition: all 0.2s;
+  cursor: help;
+  display: inline-block;
+}
+
+/* Subtly interactive link - dotted underline only under the number */
+.metrics-enabled .metric-value {
+  border-bottom: 1.5px dotted rgba(0, 0, 0, 0.15);
+}
+
+.metrics-enabled .metric-value:hover {
+  border-bottom-color: var(--color-accent);
+  background: rgba(37, 99, 235, 0.03);
+}
+
+/* Subtle superscript chip - always present but low contrast */
+.citation-chip {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-muted);
+  opacity: 0.5;
+  margin-left: 1px;
   vertical-align: super;
-  text-decoration: none !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
-  outline: none;
-  user-select: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  padding: 0 2px;
 }
 
 .citation-chip:hover,
 .citation-chip:focus {
-  background: var(--color-accent);
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.citation-chip:focus {
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
-}
-
-.citation-chip.dimmed {
-  opacity: 0.3;
-  filter: grayscale(0.8);
-}
-
-/* Cited Text Highlighting */
-.cited-claim {
-  position: relative;
-  transition: all 0.2s ease;
-  border-bottom: 1px dotted rgba(37, 99, 235, 0.4);
-}
-
-.cited-claim.highlight-active {
-  background-color: rgba(37, 99, 235, 0.05);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-/* Citation Card */
-.citation-card {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #374151;
-  transition: all 0.2s ease;
-  cursor: default;
-  position: relative;
-  border-left: 4px solid #d1d5db;
-}
-
-.citation-card.source-primary {
-  border-left-color: #10b981;
-}
-
-.citation-card.source-archived {
-  border-left-color: #3b82f6;
-}
-
-.citation-card.source-fallback {
-  border-left-color: #f59e0b;
-}
-
-.citation-card h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.citation-card .meta-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1rem;
-}
-
-.citation-card .meta-label {
-  font-weight: 600;
-  color: #6b7280;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.citation-card .source-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 9999px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-
-.citation-card a {
+  opacity: 1;
   color: var(--color-accent);
-  text-decoration: none;
-}
-
-.citation-card a:hover {
   text-decoration: underline;
 }
 
-/* Footnotes Section */
-.footnotes-section {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 2px solid #eee;
-  font-family: var(--font-sans);
-  font-size: 14px;
-}
-
-.footnotes-section h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.footnote-item {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.footnote-number {
-  font-weight: 700;
+.metrics-active .citation-chip {
+  opacity: 0.8;
   color: var(--color-accent);
-  min-width: 1.5rem;
 }
 
-/* Mobile Bottom Sheet for Citations */
-@media (max-width: 1200px) {
-  .citation-card {
-    display: none;
-    /* Only show active one as bottom sheet */
+/* Evidence Popover Card */
+.evidence-popover {
+  position: absolute;
+  width: 340px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-sans);
+  line-height: 1.4;
+  color: #444;
+  overflow: hidden;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
   }
 
-  .citation-card.active-mobile {
-    display: block !important;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popover-header {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popover-content {
+  padding: 1rem;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0.5rem 0.75rem;
+  font-size: 12px;
+}
+
+.meta-label {
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 10px;
+}
+
+.meta-value {
+  color: #1e293b;
+  word-break: break-all;
+}
+
+/* Evidence Chain */
+.evidence-chain {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.chain-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+}
+
+.step-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.step-ok {
+  background: #10b981;
+}
+
+.step-fail {
+  background: #ef4444;
+}
+
+.step-warn {
+  background: #f59e0b;
+}
+
+/* Status Badges */
+.badge {
+  padding: 2px 6px;
+  border-radius: 9999px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.badge-primary {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-archived {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-fallback {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Sync Footer */
+.sync-footer {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+/* Utility Layouts */
+.doc-container h1 {
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  color: #0f172a;
+}
+
+.doc-container h3 {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.5rem;
+  color: #475569;
+}
+
+.doc-container p {
+  margin-bottom: 1.25rem;
+}
+
+/* Mobile Bottom Sheet */
+@media (max-width: 1000px) {
+  .evidence-rail {
+    display: none;
+  }
+
+  .evidence-popover {
     position: fixed;
-    bottom: 4rem;
-    left: 0.5rem;
-    right: 0.5rem;
-    z-index: 200;
-    box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.2);
-    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 2px solid var(--color-accent);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    animation: slideUp 0.3s ease;
   }
 }
 
@@ -262,110 +325,42 @@ body {
   }
 }
 
-/* stable spacing - ensuring no reflow jumps */
-.cited-claim {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
+/* Print Section */
+.print-footnotes {
+  display: none;
+  margin-top: 3rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
 }
 
-/* Iconography Placeholder */
-.source-label::before {
-  content: '●';
-  margin-right: 4px;
-}
-
-.source-primary .source-label {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.source-archived .source-label {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.source-fallback .source-label {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-
-/* Print Overrides */
 @media print {
-  .doc-wrapper {
-    display: block;
-  }
-
-  .margin-column,
-  .metrics-bar {
-    display: none !important;
+  body {
+    background: white;
   }
 
   .doc-container {
     box-shadow: none;
-    margin: 0;
     width: 100%;
+    max-width: none;
+    margin: 0;
     padding: 0;
   }
 
-  .cited-claim {
-    border: none !important;
-    background: transparent !important;
+  .sync-footer,
+  .evidence-rail {
+    display: none !important;
+  }
+
+  .print-footnotes {
+    display: block;
+  }
+
+  .metric-value {
+    border-bottom: none !important;
   }
 
   .citation-chip {
     color: black;
-    background: transparent;
-    font-size: 9px;
-    border: none;
-    padding: 0;
+    opacity: 1;
   }
-}
-
-/* Typography for Doc */
-.doc-container h1,
-.doc-container h2,
-.doc-container h3 {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  color: #111;
-}
-
-.doc-container p {
-  margin-bottom: 1.25em;
-  font-size: 1.05rem;
-}
-
-/* Metrics Bar */
-.metrics-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 0.75rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 100;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.btn-primary {
-  background: #000;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background: #333;
-  transform: translateY(-1px);
 }

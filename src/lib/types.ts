@@ -48,6 +48,7 @@ export interface MetricResult {
     description: string;
     url: string;
     methodUsed: string;
+    failoverReason?: string;
   };
 }
 

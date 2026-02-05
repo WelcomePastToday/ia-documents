@@ -20,6 +20,8 @@ export async function fetchMetricById(id: string): Promise<MetricResult | null> 
 }
 
 async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
+    let failoverReason: string | undefined;
+
     // 1. Try Primary
     try {
         const primaryResult = await fetchSource(metric.source.primary);
@@ -28,10 +30,10 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
             if (validateValue(result.value, metric)) {
                 return result;
             }
-            console.warn(`Primary source validation failed for ${metric.id} (Value: ${String(result.value).substring(0, 50)}...)`);
+            failoverReason = `Primary validation failed: ${String(result.value).substring(0, 30)}`;
         }
     } catch (e: any) {
-        console.warn(`Primary source failed for ${metric.id}: ${e.message}`);
+        failoverReason = `Primary source failed: ${e.message}`;
     }
 
     // 2. Try Archived
@@ -41,17 +43,19 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
             if (archivedResult !== null && archivedResult !== undefined) {
                 const result = formatResult(metric, archivedResult, 'archived');
                 if (validateValue(result.value, metric)) {
-                    return result;
+                    return {
+                        ...result,
+                        meta: { ...result.meta!, failoverReason }
+                    };
                 }
-                console.warn(`Archived source validation failed for ${metric.id}`);
+                failoverReason = `${failoverReason ? failoverReason + ' | ' : ''}Archived validation failed`;
             }
         } catch (e: any) {
-            console.warn(`Archived source failed for ${metric.id}: ${e.message}`);
+            failoverReason = `${failoverReason ? failoverReason + ' | ' : ''}Archived source failed: ${e.message}`;
         }
     }
 
     // 3. Fallback
-    console.log(`Using fallback for ${metric.id}: ${metric.source.fallback.value}`);
     const fallbackUrl = metric.source.primary?.url
         ? `Manual ${metric.source.primary.url}`
         : (metric.source.archived?.url ? `Manual ${metric.source.archived.url}` : 'Manual Verification / Estimate');
@@ -67,7 +71,8 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
             title: metric.title,
             description: metric.description,
             url: fallbackUrl,
-            methodUsed: 'fallback'
+            methodUsed: 'fallback',
+            failoverReason
         }
     };
 }
