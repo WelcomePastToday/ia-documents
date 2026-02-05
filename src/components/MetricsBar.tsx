@@ -58,8 +58,6 @@ export default function MetricsBar() {
     useEffect(() => {
         if (metricsList.length === 0) return;
 
-        console.log(`Applying Evidence Rail: ${showSources ? 'ON' : 'OFF'}`);
-
         const counts: Record<string, number> = {};
         const railRoot = document.getElementById('evidence-rail');
         const wrapper = document.querySelector('.doc-wrapper');
@@ -107,11 +105,6 @@ export default function MetricsBar() {
 
                     const rect = htmlEl.getBoundingClientRect();
                     const docTop = document.querySelector('.doc-container')?.getBoundingClientRect().top || 0;
-                    // We need to account for current scroll if docTop is viewport-relative
-                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-                    const relativeTop = rect.top + scrollY - (document.querySelector('.doc-container')?.getBoundingClientRect().top || 0) - scrollY;
-                    // Wait, rect.top is relative to viewport. docTop is relative to viewport.
-                    // difference is relative to doc top.
                     marker.style.position = 'absolute';
                     marker.style.top = `${rect.top - (document.querySelector('.doc-container')?.getBoundingClientRect().top || 0)}px`;
                     marker.onclick = (e) => handleInteraction(e as any, m.metricId);
@@ -220,46 +213,42 @@ export default function MetricsBar() {
 
     return (
         <>
-            {/* Global Control - Scientific Toggle */}
-            <div className="fixed top-6 right-8 z-[100] no-print">
+            {/* Inline Controls - Bottom of Document Flow */}
+            <div className="doc-controls-container no-print">
                 <div className="proof-toggle-wrap">
-                    <span className="proof-toggle-label">Evidence Rail</span>
+                    <span className="proof-toggle-label">Sources</span>
                     <label className="proof-switch">
                         <input
                             type="checkbox"
                             checked={showSources}
-                            onChange={(e) => {
-                                console.log('Toggle Clicked:', e.target.checked);
-                                setShowSources(e.target.checked);
-                            }}
+                            onChange={(e) => setShowSources(e.target.checked)}
                         />
                         <span className="proof-slider"></span>
                     </label>
                 </div>
-            </div>
 
-            {/* Sync Footer */}
-            <footer className="sync-footer no-print">
-                <div className="sync-status">
-                    <div className={`w-1.5 h-1.5 rounded-full ${loading ? 'animate-ping bg-blue-400' : 'bg-emerald-500'}`} />
-                    <span className="tracking-tight uppercase">METRIC ENGINE: {loading ? 'FETCHING...' : 'ONLINE'}</span>
+                <div className="sync-footer-inline">
+                    <div className="sync-status">
+                        <div className={`w-1.5 h-1.5 rounded-full ${loading ? 'animate-ping bg-blue-400' : 'bg-emerald-500'}`} />
+                        <span className="tracking-tight uppercase">METRIC ENGINE: {loading ? 'FETCHING...' : 'ONLINE'}</span>
+                    </div>
+                    <div className="h-3 w-px bg-slate-200" />
+                    <div className="flex gap-4 items-center">
+                        <span className="text-slate-400 text-[10px] uppercase font-bold tracking-tight">
+                            <span className="text-slate-600">{stats.ok} verified</span> /
+                            <span className={stats.fb > 0 ? 'text-rose-600' : 'text-slate-400'}> {stats.fb} fallback</span>
+                        </span>
+                        <span className="text-slate-300 text-[10px] font-medium tracking-tight">SYNC: {lastUpdated || 'Initial'}</span>
+                        <button
+                            onClick={handleUpdate}
+                            disabled={loading}
+                            className="bg-slate-50 hover:bg-slate-100 text-slate-500 px-2.5 py-1 rounded text-[10px] font-black tracking-widest transition-all active:scale-95 disabled:opacity-50 border border-slate-200"
+                        >
+                            REFRESH ALL
+                        </button>
+                    </div>
                 </div>
-                <div className="h-3 w-px bg-white/10" />
-                <div className="flex gap-4 items-center">
-                    <span className="opacity-50 text-[10px] uppercase font-bold tracking-tight">
-                        <span className="text-white">{stats.ok} verified</span> /
-                        <span className={stats.fb > 0 ? 'text-rose-400' : 'text-white/50'}> {stats.fb} fallbacks</span>
-                    </span>
-                    <span className="opacity-40 text-[10px] font-medium tracking-tight">SYNC: {lastUpdated || 'Initial'}</span>
-                    <button
-                        onClick={handleUpdate}
-                        disabled={loading}
-                        className="bg-white/5 hover:bg-white/20 px-2.5 py-1 rounded text-[10px] font-black tracking-widest transition-all active:scale-95 disabled:opacity-50 border border-white/5"
-                    >
-                        REFRESH ALL
-                    </button>
-                </div>
-            </footer>
+            </div>
 
             {/* Popover */}
             {activeMetric && typeof document !== 'undefined' && createPortal(
