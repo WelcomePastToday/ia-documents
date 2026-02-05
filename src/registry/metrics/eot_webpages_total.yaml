@@ -7,7 +7,7 @@ unit:
   output: million
 source:
   primary:
-    url: "https://web.archive.org/collection-search/EndOfTerm2024Videos/States%20Rights%20on%20Education"
+    url: "https://web.archive.org/collection-search/EndOfTerm2024WebCrawls/"
     method: GET
     format: html
     selector: ".facets-header:contains('Live Web Status') + ul li a[href*='alive:true'] .count | text"

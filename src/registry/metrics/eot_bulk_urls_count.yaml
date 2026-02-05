@@ -6,6 +6,10 @@ unit:
   source: count
   output: million
 source:
+  primary:
+    url: "https://github.com/end-of-term/eot2024/tree/main/seed-lists"
+    method: GET
+    format: html
   fallback:
     value: 2.5
     as_of: "2025-02-05"

@@ -44,6 +44,10 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
 
     // 3. Fallback
     console.log(`Using fallback for ${metric.id}: ${metric.source.fallback.value}`);
+    const fallbackUrl = metric.source.primary?.url
+        ? `Manual ${metric.source.primary.url}`
+        : (metric.source.archived?.url ? `Manual ${metric.source.archived.url}` : 'Manual Verification / Estimate');
+
     return {
         metricId: metric.id,
         value: metric.source.fallback.value,
@@ -54,7 +58,7 @@ async function executeMetric(metric: MetricDefinition): Promise<MetricResult> {
         meta: {
             title: metric.title,
             description: metric.description,
-            url: 'Manual Verification / Estimate',
+            url: fallbackUrl,
             methodUsed: 'fallback'
         }
     };

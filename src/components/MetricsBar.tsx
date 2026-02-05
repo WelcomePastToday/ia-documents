@@ -109,8 +109,11 @@ export default function MetricsBar() {
                     sourceSup.onclick = (e: any) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        if (res.meta?.url && res.meta.url.startsWith('http')) {
-                            window.open(res.meta.url, '_blank');
+                        const url = res.meta?.url || '';
+                        const cleanUrl = url.startsWith('Manual ') ? url.replace('Manual ', '') : url;
+
+                        if (cleanUrl && cleanUrl.startsWith('http')) {
+                            window.open(cleanUrl, '_blank');
                         } else {
                             alert(`Source: ${res.meta?.description}\n\n(This is a manual fallback value. No live URL available.)`);
                         }
