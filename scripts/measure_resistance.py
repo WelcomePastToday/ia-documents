@@ -50,6 +50,24 @@ def log(msg):
     ts = datetime.datetime.now().isoformat()
     print(f"[{ts}] {msg}", flush=True)
 
+def get_ia_auth_headers():
+    """Retrieve authentication cookies from 'ia' CLI tool."""
+    try:
+        import subprocess
+        # Check if ia is in path
+        if len(subprocess.run(['which', 'ia'], capture_output=True).stdout) > 0:
+            res = subprocess.run(['ia', 'configure', '--print'], capture_output=True, text=True)
+            if res.returncode == 0 and 'logged-in-sig' in res.stdout:
+                log("Authenticated with Internet Archive credentials.")
+                return {'Cookie': res.stdout.strip()}
+    except Exception as e:
+        log(f"Authentication check failed: {e}")
+    return {}
+
+AUTH_HEADERS = get_ia_auth_headers()
+BASE_HEADERS = {'User-Agent': USER_AGENT}
+BASE_HEADERS.update(AUTH_HEADERS)
+
 def load_checkpoint():
     if os.path.exists(CHECKPOINT_FILE):
         try:
@@ -166,7 +184,7 @@ def process_domain(domain):
         while retries <= MAX_RETRIES:
             try:
                 # Use a specific timeout; larger for huge chunks
-                req = urllib.request.Request(req_url, headers={'User-Agent': USER_AGENT})
+                req = urllib.request.Request(req_url, headers=BASE_HEADERS)
                 with urllib.request.urlopen(req, timeout=180) as response:
                     content = response.read().decode('utf-8')
                     if not content.strip(): 
