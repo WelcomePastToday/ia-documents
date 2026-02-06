@@ -42,19 +42,19 @@ def main():
     # 4. Total limit ~ 100
     
     # 1. Absolute Blockers (>99%)
-    blockers_100 = [dFor d in valid if d['share_403'] >= 0.99]
+    blockers_100 = [d for d in valid if d['share_403'] >= 0.99]
     print(f"Found {len(blockers_100)} domains with >99% block rate.")
     selected.extend(blockers_100[:50]) # Take up to 50
     
     # 2. Heavy Blockers (50% - 99%)
     blockers_heavy = [d for d in valid if 0.50 <= d['share_403'] < 0.99]
     print(f"Found {len(blockers_heavy)} domains with 50-99% block rate.")
-    selected.extend(blockers_heavy[:30])
+    selected.extend(blockers_heavy)
     
     # 3. Light Blockers (1% - 50%)
     blockers_light = [d for d in valid if 0.01 <= d['share_403'] < 0.50]
     print(f"Found {len(blockers_light)} domains with 1-50% block rate.")
-    selected.extend(blockers_light[:20])
+    selected.extend(blockers_light)
     
     # Dedup and output
     # (Though logic above ensures disjoint sets)
