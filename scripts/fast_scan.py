@@ -131,45 +131,59 @@ def scan_domain_fast(domain):
     
     stats = {'2xx': 0, '3xx': 0, '4xx': 0, '403': 0, 'total': 0}
     
-    try:
-        req = urllib.request.Request(url, headers=BASE_HEADERS)
-        with urllib.request.urlopen(req, timeout=30) as r:
-            if r.status != 200:
+    MAX_RETRIES = 3
+    for attempt in range(MAX_RETRIES):
+        try:
+            req = urllib.request.Request(url, headers=BASE_HEADERS)
+            # Increased timeout to 60s for slow domains
+            with urllib.request.urlopen(req, timeout=60) as r:
+                if r.status != 200:
+                    # Non-200 might simply stay non-200
+                    return stats
+                txt = r.read().decode('utf-8')
+                if not txt.strip(): return stats
+                
+                try:
+                    data = json.loads(txt)
+                except: 
+                    return stats
+                    
+                # Filter headers
+                if data and len(data)>0 and data[0][0] == 'statuscode':
+                    data = data[1:]
+                
+                for row in data:
+                    # Row might be resume key (last one)
+                    if len(row) != 1 or not row[0].isdigit(): 
+                        # check if it is status code
+                        if len(row) == 1 and row[0].isdigit():
+                            pass # Valid
+                        else:
+                            continue # Skip resume keys etc
+                    
+                    code = int(row[0])
+                    if 200 <= code < 300: stats['2xx'] += 1
+                    elif 300 <= code < 400: stats['3xx'] += 1
+                    elif 400 <= code < 500:
+                        stats['4xx'] += 1
+                        if code == 403: stats['403'] += 1
+                    
+                    stats['total'] += 1
+                
+                # Success - return stats
                 return stats
-            txt = r.read().decode('utf-8')
-            if not txt.strip(): return stats
-            
-            try:
-                data = json.loads(txt)
-            except: 
-                return stats
-                
-            # Filter headers
-            if data and len(data)>0 and data[0][0] == 'statuscode':
-                data = data[1:]
-            
-            for row in data:
-                # Row might be resume key (last one)
-                if len(row) != 1 or not row[0].isdigit(): 
-                    # check if it is status code
-                    if len(row) == 1 and row[0].isdigit():
-                        pass # Valid
-                    else:
-                        continue # Skip resume keys etc
-                
-                code = int(row[0])
-                if 200 <= code < 300: stats['2xx'] += 1
-                elif 300 <= code < 400: stats['3xx'] += 1
-                elif 400 <= code < 500:
-                    stats['4xx'] += 1
-                    if code == 403: stats['403'] += 1
-                
-                stats['total'] += 1
-                
-    except Exception as e:
-        log(f"Error scanning {domain}: {e}")
+                    
+        except Exception as e:
+            if attempt < MAX_RETRIES - 1:
+                wait_time = (2 ** attempt) + random.random()
+                # log(f"Retry {attempt+1} for {domain} due to {e}") # Optional: keep logs quiet or verbose
+                time.sleep(wait_time)
+            else:
+                log(f"Error scanning {domain}: {e}")
         
     return stats
+
+import concurrent.futures
 
 def main():
     if not os.path.exists(INPUT_FILE):
@@ -177,12 +191,15 @@ def main():
         sys.exit(1)
         
     domains = [line.strip() for line in open(INPUT_FILE) if line.strip() and not line.startswith('#')]
-    # domains = fetch_domains... (assume file exists for simplicity)
     
     processed = load_checkpoint()
     processed_set = set(processed)
     
     print(f"Loaded {len(domains)} domains. {len(processed_set)} already done.")
+    
+    # Identify work remaining
+    todo = [d for d in domains if d not in processed_set]
+    print(f"Remaining: {len(todo)} domains.")
     
     # CSV Init
     headers = ['domain', 'total_sample', '2xx', '3xx', '4xx', '403', 'share_403']
@@ -190,39 +207,47 @@ def main():
         with open(OUTPUT_FILE, 'w') as f:
             csv.DictWriter(f, fieldnames=headers).writeheader()
             
-    count = 0
+    # Concurrency
+    MAX_WORKERS = 10 
+    
+    # We open the file once and append results as they come in
     with open(OUTPUT_FILE, 'a') as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         
-        for d in domains:
-            if d in processed_set: continue
+        count = 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            # Map returns iterator in order of submission? No, use as_completed for responsiveness
+            future_to_domain = {executor.submit(scan_domain_fast, d): d for d in todo}
             
-            if count % 20 == 0:
-                log(f"Processing {d}...")
-                
-            stats = scan_domain_fast(d)
-            
-            share_403 = 0.0
-            if stats['total'] > 0:
-                share_403 = stats['403'] / stats['total']
-                
-            writer.writerow({
-                'domain': d,
-                'total_sample': stats['total'],
-                '2xx': stats['2xx'],
-                '3xx': stats['3xx'],
-                '4xx': stats['4xx'],
-                '403': stats['403'],
-                'share_403': f"{share_403:.4f}"
-            })
-            f.flush()
-            
-            processed.append(d)
-            count += 1
-            if count % 50 == 0:
-                save_checkpoint(processed)
-            
-            time.sleep(0.1) # Fast but polite
+            for future in concurrent.futures.as_completed(future_to_domain):
+                d = future_to_domain[future]
+                try:
+                    stats = future.result()
+                    
+                    share_403 = 0.0
+                    if stats['total'] > 0:
+                        share_403 = stats['403'] / stats['total']
+                        
+                    writer.writerow({
+                        'domain': d,
+                        'total_sample': stats['total'],
+                        '2xx': stats['2xx'],
+                        '3xx': stats['3xx'],
+                        '4xx': stats['4xx'],
+                        '403': stats['403'],
+                        'share_403': f"{share_403:.4f}"
+                    })
+                    f.flush()
+                    
+                    processed.append(d)
+                    count += 1
+                    
+                    if count % 20 == 0:
+                        log(f"Processed {count}/{len(todo)} domains...")
+                        save_checkpoint(processed)
+                        
+                except Exception as e:
+                    log(f"Unhandled exception for {d}: {e}")
             
     save_checkpoint(processed)
     print("Fast scan complete.")
