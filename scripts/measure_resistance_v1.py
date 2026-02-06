@@ -169,25 +169,27 @@ def process_domain(domain):
     start_time = time.time()
     pages_processed = 0
     
-    stopped_reason = "completed"
-    
     while more_pages:
         # 1. Hard Limits Check
         if pages_processed >= MAX_PAGES:
             log(f"  > Reached page limit ({MAX_PAGES}) for {domain}. Stopping.")
-            stopped_reason = "limit_pages"
             break
         if (time.time() - start_time) > MAX_DURATION:
             log(f"  > Reached time limit ({MAX_DURATION}s) for {domain}. Stopping.")
-            stopped_reason = "limit_time"
             break
             
         # 2. Early Stopping (Stable Signal)
+        # If we have seen enough data and it is overwhelmingly one way, maybe stop?
+        # Only safe if we assume recent behavior (which we read first? No, CDX order is not time order).
+        # Actually, CDX order is URL key order.
+        # So "stable" meant "lexically stable"?
+        # If the first 10,000 URLs are all blocked, is the rest?
+        # Probably. But let's be conservative. 
+        # If > 99% are 403s after 50k rows?
         if stats['total'] > STABLE_THRESHOLD_COUNT:
              share_403 = stats['403'] / stats['total']
              if share_403 > 0.995:
                  log(f"  > Early stop: {domain} is >99.5% blocked ({stats['total']} samples). Assumption: consistently blocked.")
-                 stopped_reason = "early_stop_stable_block"
                  break
         
         params = {
@@ -239,7 +241,6 @@ def process_domain(domain):
         
         if not success:
             log(f"Failed to fetch chunk for {domain}. Stopping early.")
-            stopped_reason = "fetch_failure"
             break
             
         if not data:
@@ -247,19 +248,41 @@ def process_domain(domain):
             break
             
         # --- Handle Resume Key ---
+        # With output=json, the resume key is usually the *last* element of the list.
+        # It looks like: ["resume-key-string"] or ["resume-key-string", ""] depending on version.
+        # Data rows are: ["timestamp", "statuscode"] (length 2).
+        # We detect it by checking the last row.
+        
         new_resume_key = None
         rows_to_process = data
         
         if len(data) > 0:
             last_row = data[-1]
+            # Resume key row usually has fewer elements than data, or is explicitly just the key.
+            # Our data rows are length 2.
+            # Resume key row is typically length 1 or 2, but contents are not digits.
+            
+            # Heuristic: If last row[0] is NOT a timestamp (14 chars digit), it might be a key?
+            # Or simpler: CDX documented behavior is it is the last line.
+            # If the response was limited by 'limit', the last line is the resume Key.
+            # If the response finished naturally, there is NO resume key line (usually).
+            # But with showResumeKey=true, correct behavior is:
+            # - If more data exists: Returns limit+1 rows? Or just last row is key.
+            # actually usually empty list [] at end relative to data?
+            
+            # Let's check generally for string-like key at end.
             if len(last_row) >= 1:
                 # Timestamps are YYYYMMDDHHMMSS (14 digits).
                 if not (isinstance(last_row[0], str) and last_row[0].isdigit() and len(last_row[0]) == 14):
+                    # It's likely a resume key
+                    # resume key is usually a long string.
                     if len(last_row) >= 1:
                         new_resume_key = last_row[0]
+                        # Remove it from processing
                         rows_to_process = data[:-1]
 
         # --- Remove Headers if present ---
+        # Headers "timestamp, statuscode" usually appear on first page, row 0.
         if len(rows_to_process) > 0 and rows_to_process[0][0] == 'timestamp':
             rows_to_process = rows_to_process[1:]
             
@@ -310,7 +333,6 @@ def process_domain(domain):
         if new_resume_key:
             if new_resume_key == resume_key:
                 log(f"  > Infinite loop detected: resume key '{new_resume_key}' repeated. Stopping.")
-                stopped_reason = "infinite_loop"
                 break
             resume_key = new_resume_key
             # Clean loop for next page
@@ -331,8 +353,6 @@ def process_domain(domain):
     if den > 0:
         share_4xx = stats['4xx'] / den
         
-    duration = time.time() - start_time
-    
     summary = {
         'total_captures': stats['total'],
         'count_2xx': stats['2xx'],
@@ -342,10 +362,7 @@ def process_domain(domain):
         'count_404': stats['404'], # Includes 410
         'count_5xx': stats['5xx'],
         'ratio_4xx_to_2xx': ratio_4xx,
-        'share_4xx': share_4xx,
-        'pages_processed': pages_processed,
-        'duration_seconds': f"{duration:.2f}",
-        'stopped_reason': stopped_reason
+        'share_4xx': share_4xx
     }
     
     return summary, monthly_stats
@@ -361,8 +378,7 @@ def write_result_safe(summary_row, monthly_rows):
         # Define headers here to ensure consistency across threads
         summary_headers = ['domain', 'total_captures', 'count_2xx', 'count_3xx', 'count_4xx', 
                            'count_403', 'count_404', 'count_5xx', 
-                           'ratio_4xx_to_2xx', 'share_4xx', 'timestamp',
-                           'pages_processed', 'duration_seconds', 'stopped_reason']
+                           'ratio_4xx_to_2xx', 'share_4xx', 'timestamp']
         write_csv_row(OUTPUT_SUMMARY_CSV, summary_headers, summary_dict=summary_row)
         if monthly_rows:
             # Assuming headers are consistent
